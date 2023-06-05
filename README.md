@@ -48,6 +48,8 @@ The backend project relies on the following dependencies:
 - ``reflect-metadata``: A library for adding metadata reflection to TypeScript.
 - ``tsc-watch``: A TypeScript compiler watcher.
 - ``typeorm``: An Object-Relational Mapping (ORM) library.
+
+
 These dependencies are automatically installed when running ``npm install``.
 
 ## Connecting to the Frontend
