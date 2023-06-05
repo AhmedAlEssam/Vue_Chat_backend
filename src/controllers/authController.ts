@@ -4,15 +4,19 @@ import User from "../entities/user";
 import { generateToken, hash, verify } from "../helpers/hash";
 import authMiddleware, { RequestWithUser } from "../middlewares/authMiddleware";
 
+
 @Controller('/auth')
+
 export default class AuthController {
+
 
     // @ts-ignore
     @Get('/me', [authMiddleware])
     async me(@Req() req: RequestWithUser, @Res() res: Response) {
         return res.json({ user: req.user })
     }
-
+ 
+ 
     @Post('/signup')
     async signup(@Req() req: Request, @Res() res: Response) {
         let fields = ["name", "email", "password"];
@@ -45,7 +49,8 @@ export default class AuthController {
             token,
         });
     }
-
+ 
+ 
     @Post('/login')
     async login(@Req() req: Request, @Res() res: Response) {
         const { email, password } = req.body;
@@ -79,25 +84,24 @@ export default class AuthController {
                 })
             }
             return res.json({
-                token
+                token, user
             });
         }
         return res.status(401).json({
             message: "The username or password is incorrect"
         })
     }
-
+ 
+ 
     // @ts-ignore
     @Post('/logout', [authMiddleware])
-    async logout(@Req() req: RequestWithUser, @Res() res: Response) { 
+    async logout(@Req() req: RequestWithUser, @Res() res: Response) {
         const { email } = req.body;
-
         const user = await User.findOne({
             where: { email }, select: {
                 email: true, password: true, id: true, authToken: true
             }
         });
-
         if (user != null) {
             user.authToken = '';
             try {
