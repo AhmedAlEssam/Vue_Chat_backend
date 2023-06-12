@@ -10,8 +10,7 @@ import User from "../entities/user";
 @Controller('/conversations', [authMiddleware])
 
 export default class ConversationController {
- 
- 
+
     @Get('/:conversationId/messages')
     async getMessages(@Req() req: RequestWithUser, @Res() res: Response) {
         let conversationId = Number(req.params.conversationId)
@@ -27,29 +26,35 @@ export default class ConversationController {
         res.json({ messages })
     }
 
-
     @Post('/:conversationId/messages')
     async createMessage(@Req() req: RequestWithUser, @Res() res: Response) {
         let conversationId = Number(req.params.conversationId)
         let conversation = await Conversation.findOneBy({ id: conversationId })
-        if (conversation == null) {
-            return res.status(404);
-        }
-        if (req.body.text == "") {
-            return res.status(422).send();
-        }
+        var newConv = new Conversation();
+        let users = await User.findBy({ id: In(req.body.users) });
         let message = new Message();
-        message.conversation = conversation;
         message.user = req.user;
         message.text = req.body.text;
+
+        if (conversation == null) {
+            newConv.title = "New Conversation"
+            newConv.users = users;
+            await newConv.save();
+            message.conversation = newConv;
+        }
+        else {
+
+            message.conversation = conversation;
+        }
+
         try {
             await message.save();
         } catch (e) {
             console.log(e)
         }
+
         res.json({ message })
     }
-
 
     @Post('/')
     async createNewConversation(@Req() req: RequestWithUser, @Res() res: Response) {
@@ -57,7 +62,6 @@ export default class ConversationController {
         conversation.title = req.body.title;
         let user = req.user;
         let users = await User.findBy({ id: In(req.body.users) });
-        console.log(users);
         conversation.users = users;
         try {
             await conversation.save();
@@ -68,26 +72,26 @@ export default class ConversationController {
         }
     }
 
-
     @Get('/')
     async getAllConversations(@Req() req: RequestWithUser, @Res() res: Response) {
         const conversations = await Conversation.find({
             relations: {
                 messages: true,
                 users: true
+            },
+            order: {
+                messages: {
+                    createdAt: "ASC"
+                }
             }
         });
-        return res.json({
-            conversations: conversations
-        })
-    }
 
+        return res.json({ conversations: conversations })
+    }
 
     @Get('/users')
     async getAllUsers(@Req() req: RequestWithUser, @Res() res: Response) {
         const users = await User.find();
-        return res.json({
-            users
-        })
+        return res.json({ users })
     }
 }

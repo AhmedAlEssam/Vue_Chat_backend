@@ -1,23 +1,18 @@
-import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    Entity,
-    JoinTable,
-    ManyToMany,
-    OneToMany,
-    PrimaryGeneratedColumn
-} from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import Message from "./message";
 import User from "./user";
 
 @Entity()
 export default class Conversation extends BaseEntity {
+
     @PrimaryGeneratedColumn()
     id: number
 
     @Column()
     title: string
+
+    @Column({ default: 'src/assets/imgs/default-pfp-m.svg' })
+    imgUrl: string
 
     @CreateDateColumn()
     createdAt: Date
@@ -25,8 +20,8 @@ export default class Conversation extends BaseEntity {
     @OneToMany(() => Message, (message) => message.conversation)
     messages: Message[]
 
-
     @ManyToMany(() => User, (user) => user.conversations)
     @JoinTable()
     users: User[]
+
 }

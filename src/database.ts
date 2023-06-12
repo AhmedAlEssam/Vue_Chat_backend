@@ -1,7 +1,9 @@
-import {DataSource} from "typeorm";
+//src\database.ts
+import { DataSource } from "typeorm";
 import User from "./entities/user";
 import Conversation from "./entities/conversation";
 import Message from "./entities/message";
+import Attachment from "./entities/attachment";
 
 const source = new DataSource({
     type: "postgres",
@@ -13,7 +15,8 @@ const source = new DataSource({
     entities: [
         User,
         Conversation,
-        Message
+        Message,
+        Attachment
     ],
     synchronize: true
 })

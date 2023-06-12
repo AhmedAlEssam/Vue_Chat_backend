@@ -4,19 +4,15 @@ import User from "../entities/user";
 import { generateToken, hash, verify } from "../helpers/hash";
 import authMiddleware, { RequestWithUser } from "../middlewares/authMiddleware";
 
-
 @Controller('/auth')
-
 export default class AuthController {
-
 
     // @ts-ignore
     @Get('/me', [authMiddleware])
     async me(@Req() req: RequestWithUser, @Res() res: Response) {
         return res.json({ user: req.user })
     }
- 
- 
+
     @Post('/signup')
     async signup(@Req() req: Request, @Res() res: Response) {
         let fields = ["name", "email", "password"];
@@ -49,32 +45,37 @@ export default class AuthController {
             token,
         });
     }
- 
- 
+
     @Post('/login')
     async login(@Req() req: Request, @Res() res: Response) {
         const { email, password } = req.body;
+
         if (email == null || password == null) {
             return res.status(422).json({
                 message: "The username and password are required"
             });
         }
+
+        console.log(req.body);
         const user = await User.findOne({
             where: { email }, select: {
-                email: true, password: true, id: true
+                email: true, password: true, id: true, pfp: true, name: true
             }
         });
+
         if (user == null) {
             return res.status(401).json({
                 message: "The username or password is incorrect"
             })
         }
+
         const verified = await verify(password, user.password);
         if (verified) {
             let token = generateToken({
                 userId: user.id,
                 email: user.email
             });
+            
             user.authToken = token;
             try {
                 await user.save();
@@ -87,21 +88,23 @@ export default class AuthController {
                 token, user
             });
         }
+
         return res.status(401).json({
             message: "The username or password is incorrect"
         })
     }
- 
- 
+
     // @ts-ignore
     @Post('/logout', [authMiddleware])
     async logout(@Req() req: RequestWithUser, @Res() res: Response) {
         const { email } = req.body;
+
         const user = await User.findOne({
             where: { email }, select: {
                 email: true, password: true, id: true, authToken: true
             }
         });
+
         if (user != null) {
             user.authToken = '';
             try {
